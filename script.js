@@ -89,6 +89,7 @@ pizzaJson.map ((item,index) => {
 
 /* --------- Funcionalidades Janela Modal ------------------*/
 
+
 /* --------- Função que Fecha o Modal --------------------- */
 function closeModal() {
     document.querySelector('.pizzaWindowArea').style.opacity = 0;
@@ -130,4 +131,138 @@ document.querySelector('.pizzaInfo--qtmenos').addEventListener('click', () => {
 });
 
 
+/* ---------------- Tamanho das Pizzas ------------------ */
 
+/* Selecionando todos os elementos pizzaInfo--size pegando o tamanho da pizza e a posição dos elementos */
+document.querySelectorAll('.pizzaInfo--size').forEach((item, sizeIndex)  => {
+    /* sempre que em um sistemas tivermos que selecionar uma opção diferente e uma opção anterior estiver selecionada, devemos primeiro tirar a seleção de todas as opções anteriores e só depois selecionar a nova opção que o usuário selecionou.*/
+    item.addEventListener('click', (event) => {
+
+        /* Removendo a classe selecionada dos tamanho da pizza, assim garantimos que nenhuma pizza estará selecionada do usuario selecionar um tamanho */
+        document.querySelector('.pizzaInfo--size.selected').classList.remove('selected')
+        
+        /*Adicionando a classe selected ao tamanho que o usuario está clicando*/
+        item.classList.add('selected')
+
+    })
+
+}) 
+
+
+/* ----------- Botão Adicionar ao Carrinho ------------------ */
+
+document.querySelector('.pizzaInfo--addButton').addEventListener('click', () => {
+ //Quando o usuário clicar no botão adicionar pizza ao carrinho precisaremos saber - Qual a pizza - Qual o tamanho da pizza, -Quantas pizzas serão adicionadas.
+ 
+    // Qual a pizza
+    //console.log("Pizza: "+ modalKey)
+ 
+    //Qual o tamanho da pizza
+    //para sabermos o tamanho da pizza, iremos pegar o valor do atributo data-key pois cada número identifica um tamanho de pizza
+    //parseInt = converter o tamanho que está no data-key em inteiro pois o mesmo é uma string
+    let size = parseInt(document.querySelector('.pizzaInfo--size.selected').getAttribute('data-key'));
+    /* Console.log("Tamanho :" +size) */
+
+    /* Criando um identificador para detectar quando estão sendo adicionadas pizzas iguais ao carrinho, assim evitamos que ele crie uma nova chave para a mesma pizza */
+    let identifier = pizzaJson[modalKey].id + '@' + size;
+    /* console.log(identifier) */
+
+    /* FindIndex procura elementos ou itens iguais ou seja varrendo o vetor cart bucando por itens iguais nele, ou seja por pizzas iguais dentro do vetor */
+    let key = cart.findIndex((item) => {
+        return item.identifier == identifier
+    })
+
+    /* Caso seja encontrado itens iguais no vetor, ou seja pizzas iguais no vetor iremos atualizar a quantidade de pizzas ao invez de adicionar uma nova */
+    if (key > -1) {
+        cart[key].qt += modalQTD
+    } 
+    else {
+        /* push - Permite adicionar novos elemetnos ao final do array, ou seja , ao usar o push tudo o que for passado a ele será adicionado ao final do array */
+        cart.push({
+            identifier,
+            id: pizzaJson[modalKey].id,
+            size,
+            qt: modalQTD
+        })
+    }
+
+    /* console.log(cart) */
+    updateCart();
+    closeModal();
+})
+
+
+/* ----------- Atualização Do Carrinho ---------------------- */
+
+
+/* Exibindo o carrinho caso tenham pizzas adicionais */
+document.querySelector('.menu-openner').addEventListener('click', () => {
+    if (cart.length > 0) {
+        document.querySelector('aside').style.left = '0';
+    }
+})
+
+/* Escondendo o carrinho ao usuario clicar em fechar carrinho */
+document.querySelector('.menu-closer').addEventListener('click', () => {
+    document.querySelector('aside').style.left = '100vw';
+})
+
+
+function updateCart() {
+    /* Atualizando a quantidade de pizzas no carrinho na versão mobile */
+    document.querySelector('.menu-openner span').innerHTML = cart.length;
+
+
+    /* Verificando se o carrinho possue pizzas adicionadas */
+    if (cart.length > 0) {
+        /* Adicionando a classe show a tag aside, isso fará com que o carrinho seja exibido na tela */
+        document.querySelector('aside').classList.add('show');
+
+        /* Limpando o html antes de exibir as pizzas novamente */
+        document.querySelector('.cart').innerHTML = '';
+
+        let subTotal = 0;
+        let desconto = 0;
+        let total = 0;
+
+        for (let i in cart) {
+            /* Iremos procurar dentro no pizzaJson itens que tenham o mesmo id da pizza a qual o usuário clicou, a função find irá buscar no array e em seguida jogar dentro do parâmetro item. Nesse caso usamos a função find ao invés de findInde pois queremos retornar todas as informações dos itens do json e não somente o índice dele(posição no array) */
+            let pizzaItem = pizzaJson.find((item) => {
+                /* Procurando nos itens do array que serão adicionados no parâmetros(variável) item e iremos procurar o id deste item por um item que será igual ao item que estiver no carrinho, assim poderemos exibir as informações desse item */
+                return item.id == cart[i].id;
+            })
+
+            /* Atualizando o subtotal */
+            subTotal += pizzaItem.price * cart[i].qt;
+
+            /* Clonando o elemento pizza-item onde serão exibidos os dados da pizza no carrinho */
+            let cartItem = document.querySelector('.models .cart--item').cloneNode(true);
+
+            /* O switch case irá percorrer o array de tamanho de pizzas adicionando uma letra correspondente ao tamanho da pizza, se não fizessemos isso não teriamos como o usuário saber o tamanho da pizza que ele está comprando. */
+            let pizzaSizeName;
+            switch (cart[i].size) {
+                case 0:
+                    pizzaSizeName = 'P'
+                    break;
+                case 1:
+                    pizzaSizeName = 'M'
+                    break;
+                case 2 :
+                    pizzaSizeName = 'G'
+                    break;
+            }
+
+            /* Concatenando o nome da pizza com o tamanho da mesma */
+            let pizzaName = `${pizzaItem.name} (${pizzaSizeName})`
+
+            cartItem.querySelector('img').src = pizzaItem.img;
+            cartItem.querySelector('.cart--item-nome').innerHTML = pizzaName;
+            cartItem.querySelector('.cart--item--qt').innerHTML = cart[i].qt;
+
+            
+
+        }
+
+    }
+
+}
