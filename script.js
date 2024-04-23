@@ -104,6 +104,7 @@ document.querySelectorAll('.pizzaInfo--cancelButton, .pizzaInfo--cancelMobileBut
     item.addEventListener('click', closeModal);
 });
 
+/* Poderia fazer destes 2 jeitos mas para simplificar da pra chamar o queryselectorall em dois elementos do html */
 /* document.querySelector('pizzaInfo--cancelButton').addEventListener('click', (event) => {
     closeModal();
 })
@@ -192,7 +193,7 @@ document.querySelector('.pizzaInfo--addButton').addEventListener('click', () => 
 })
 
 
-/* ----------- Atualização Do Carrinho ---------------------- */
+/* ----------- Atualização Do Carrinho -------------------- */
 
 
 /* Exibindo o carrinho caso tenham pizzas adicionais */
@@ -259,10 +260,46 @@ function updateCart() {
             cartItem.querySelector('.cart--item-nome').innerHTML = pizzaName;
             cartItem.querySelector('.cart--item--qt').innerHTML = cart[i].qt;
 
-            
+            /* Detectando quando o usuário clicar no botão de diminuir a quantidade de pizza e atualizando a quantidade */
+            cartItem.querySelector('.cart--item-qtmenos').addEventListener('click', () => {
+                if (cart[i].qt > 1) {
+                    cart[i].qt--
+                }
+                else {
+                    /* Iremos usar o splice para remover a pizza do carrinho, pois somente iremos entra no else se a quantidade de pizzas no carrinho forem maiores que 1, caso seja 1 e o usuário clicar no botão - significa que o usuário quer remover a pizza do carrinho.
+                    Splice-- Possibilita remover elementos de um array, no caso abaixo, diremos que queremos remover o item que está na posição i e em seguida diremos quantos itens ele irá remover, como só temos um item no array ele irá remover este item */
+                    cart.splice(i, 1)
+                }
 
+                /* Chamamos o updateCart pois sem ele o número de pizza não irá ser exibido na tela */
+                updateCart();
+            });
+
+            cartItem.querySelector('.cart--item-qtmais').addEventListener('click', () => {
+                cart[i].qt++
+                    updateCart()
+            });
+
+            /* Adicionando o elemento clonado do html ao carrinho */
+            document.querySelector('.cart').append(cartItem);
         }
 
-    }
+        /* Calculando desconto de 10% sobre o valor */
+        desconto = subTotal * 0.1;
 
+        total = subTotal - desconto;
+
+        document.querySelector('.subtotal span:last-child').innerHTML = `R$ ${subTotal.toFixed(2).replace('.' , ',')}`
+
+        document.querySelector('.desconto span:last-child').innerHTML = `R$ ${desconto.toFixed(2).replace('.' , ',')}`
+
+        document.querySelector('.total span:last-child').innerHTML = `R$ ${total.toFixed(2).replace('.' , ',')}`
+    }
+    else {
+        /* Escondendo menu desktop */
+        document.querySelector('aside').classList.remove('show');
+
+        /* Escondendo Menu Mobile */
+        document.querySelector('aside').style.left = '100vw'
+    }
 }
