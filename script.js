@@ -13,7 +13,7 @@ pizzaJson.map ((item,index) => {
     document.querySelector('.pizza-area').append(pizzaItem)
 
 
-    document.querySelector('.pizza-item--img img').src = item.img;
+    pizzaItem.querySelector('.pizza-item--img img').src = item.img;
 
     /* Tofixed - Adiciona 2 casas decimais */
     /* Replace - Trocara o . pela , */
